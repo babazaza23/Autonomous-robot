@@ -3,7 +3,6 @@ import numpy as np
 import RPi.GPIO as GPIO
 import time
 
-# --- GPIO SETUP FOR ZY ELECTRONICS (L298N) ---
 IN1 = 17
 IN2 = 18
 ENA = 22
@@ -12,19 +11,17 @@ IN3 = 23
 IN4 = 24
 ENB = 25
 
-# --- GPIO SETUP FOR HC-SR04 ULTRASONIC SENSOR ---
 TRIG = 5
 ECHO = 6
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
 
-# Cài đặt chân động cơ
-motor_pins =
+
+motor_pins = 
 for pin in motor_pins:
     GPIO.setup(pin, GPIO.OUT)
 
-# Cài đặt chân siêu âm
 GPIO.setup(TRIG, GPIO.OUT)
 GPIO.setup(ECHO, GPIO.IN)
 
@@ -33,7 +30,6 @@ pwm_B = GPIO.PWM(ENB, 50)
 pwm_A.start(0)
 pwm_B.start(0)
 
-# Hàm điều khiển động cơ
 def move_robot(left_speed, right_speed):
     if left_speed >= 0:
         GPIO.output(IN1, GPIO.HIGH)
@@ -53,7 +49,6 @@ def move_robot(left_speed, right_speed):
         GPIO.output(IN4, GPIO.HIGH)
         pwm_B.ChangeDutyCycle(abs(right_speed))
 
-# Hàm đo khoảng cách
 def get_distance():
     GPIO.output(TRIG, True)
     time.sleep(0.00001)
@@ -63,7 +58,6 @@ def get_distance():
     pulse_end = time.time()
     timeout = time.time()
 
-    # Chống treo chương trình nếu lỏng dây
     while GPIO.input(ECHO) == 0:
         pulse_start = time.time()
         if time.time() - timeout > 0.1: 
@@ -94,18 +88,16 @@ missing_frames = 0
 
 try:
     while True:
-        # 1. ĐO KHOẢNG CÁCH VÀ KIỂM TRA VẬT CẢN TRƯỚC
         dist = get_distance()
         
         if dist <= 20.0:
             print(f">>> CANH BAO: Phat hien vat can o {dist} cm. DUNG XE!")
-            move_robot(0, 0) # Phanh khẩn cấp
+            move_robot(0, 0) 
             time.sleep(0.1)
-            continue # Bỏ qua phần dò line bên dưới để ưu tiên dừng lại
+            continue 
         else:
             print(f"Duong trong (Khoang cach: {dist} cm). Dang bam line...")
 
-        # 2. XỬ LÝ CAMERA DÒ LINE
         ret, frame = cap.read()
         if not ret:
             break
@@ -140,7 +132,6 @@ try:
                 
                 move_robot(left_motor_speed, right_motor_speed)
         else:
-            # --- XỬ LÝ KHI BỊ ĐỨT LINE ---
             missing_frames += 1
             if missing_frames < 10:
                 move_robot(BASE_SPEED, BASE_SPEED)
